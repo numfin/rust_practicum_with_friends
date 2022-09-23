@@ -1,0 +1,7 @@
+[package]
+name = "practicum"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cuid = "1.2.0"
