@@ -1,49 +1,73 @@
-pub struct TodoList {
-    pub todos: Vec<Todo>,
+use std::collections::HashMap;
+
+pub struct TodoList<'a> {
+    pub todos: HashMap<String, Todo<'a>>,
 }
-impl TodoList {
+impl<'a> TodoList<'a> {
     pub fn new() -> Self {
-        Self { todos: vec![] }
-    }
-    pub fn add_todo(&mut self, name: String) -> String {
-        self.todos.push(Todo::new(name));
-        self.todos.last().unwrap().id.clone()
-    }
-    pub fn delete_todo(&mut self, id: &String) {
-        let todo_index = self.todos.iter().position(|todo| &todo.id == id);
-        if let Some(todo_index) = todo_index {
-            self.todos.remove(todo_index);
+        Self {
+            todos: Default::default(),
         }
     }
-    pub fn toggle_todo(&mut self, id: &String) {
-        let todo = self.todos.iter_mut().find(|todo| &todo.id == id);
-        if let Some(v) = todo {
-            v.toggle_todo()
+    pub fn add_todo(&mut self, name: &'a str) -> String {
+        let todo = Todo::new(name);
+        let inserted_id = todo.id.clone();
+        self.todos.insert(inserted_id.clone(), todo);
+        inserted_id
+    }
+    pub fn delete_todo(&mut self, id: &str) {
+        if self.todos.remove(id).is_some() {
+            println!("Todo was deleted from list")
         }
     }
-    pub fn filter_todos(&self, show_done: bool) -> Vec<&Todo> {
+    pub fn toggle_todo(&mut self, id: &str) {
+        self.todos
+            .get_mut(id)
+            .map(|todo| todo.toggle_todo())
+            .unwrap();
+    }
+    pub fn filter_todos(&self, show_everything: bool) -> Vec<&Todo<'a>> {
         self.todos
             .iter()
-            .filter(|todo| if show_done { true } else { !todo.is_done })
+            .map(|(_, todo)| todo)
+            .filter(|todo| match todo.status {
+                TodoStatus::Pending => true,
+                _ => show_everything,
+            })
             .collect()
     }
 }
 
-#[derive(Debug)]
-pub struct Todo {
-    pub id: String,
-    pub is_done: bool,
-    pub name: String,
+impl Default for TodoList<'_> {
+    fn default() -> Self {
+        Self::new()
+    }
 }
-impl Todo {
-    pub fn new(name: String) -> Self {
+
+#[derive(Debug)]
+pub struct Todo<'a> {
+    pub id: String,
+    pub status: TodoStatus,
+    pub name: &'a str,
+}
+impl<'a> Todo<'a> {
+    pub fn new(name: &'a str) -> Self {
         Self {
             id: cuid::cuid().unwrap(),
             name,
-            is_done: false,
+            status: TodoStatus::Pending,
         }
     }
     pub fn toggle_todo(&mut self) {
-        self.is_done = !self.is_done;
+        self.status = match self.status {
+            TodoStatus::Pending => TodoStatus::Done,
+            TodoStatus::Done => TodoStatus::Pending,
+        };
     }
+}
+
+#[derive(Debug)]
+pub enum TodoStatus {
+    Done,
+    Pending,
 }
