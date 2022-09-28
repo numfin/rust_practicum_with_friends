@@ -1,0 +1,4 @@
+- [x] Todo implementation
+- [x] Server methods
+- [ ] Database connection
+- [ ] Improve DX, Tests
