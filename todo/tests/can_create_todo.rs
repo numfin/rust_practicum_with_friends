@@ -1,4 +1,4 @@
-use practicum::todo::TodoList;
+use todo::TodoList;
 
 #[test]
 fn can_create_todo() {
