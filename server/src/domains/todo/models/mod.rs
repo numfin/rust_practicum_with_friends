@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use super::repositories;
+
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Todo {
@@ -16,11 +18,12 @@ pub enum TodoStatus {
     InProgress { from: String },
 }
 
-impl From<todo::TodoStatus> for TodoStatus {
-    fn from(status: todo::TodoStatus) -> Self {
+impl From<repositories::todo::TodoStatus> for TodoStatus {
+    fn from(status: repositories::todo::TodoStatus) -> Self {
+        use repositories::todo::TodoStatus;
         match status {
-            todo::TodoStatus::Done => Self::Done,
-            todo::TodoStatus::Pending => Self::Pending,
+            TodoStatus::Done => Self::Done,
+            TodoStatus::Pending => Self::Pending,
         }
     }
 }

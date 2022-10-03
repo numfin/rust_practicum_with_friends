@@ -1,0 +1,8 @@
+[config]
+skip_core_tasks = true
+
+[tasks.dev]
+command = "cargo"
+args = ["run"]
+watch = { watch = ["src"] }
+env_files = [".env"]

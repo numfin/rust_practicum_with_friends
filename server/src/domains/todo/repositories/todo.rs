@@ -1,16 +1,18 @@
 use std::collections::HashMap;
 
-pub struct TodoList<'a> {
-    pub todos: HashMap<String, Todo<'a>>,
+use serde::Serialize;
+
+pub struct TodoList {
+    pub todos: HashMap<String, Todo>,
 }
-impl<'a> TodoList<'a> {
+impl TodoList {
     pub fn new() -> Self {
         Self {
             todos: Default::default(),
         }
     }
-    pub fn add_todo(&mut self, name: &'a str) -> String {
-        let todo = Todo::new(name);
+    pub fn add_todo(&mut self, name: &str) -> String {
+        let todo = Todo::new(name.to_string());
         let inserted_id = todo.id.clone();
         self.todos.insert(inserted_id.clone(), todo);
         inserted_id
@@ -26,7 +28,7 @@ impl<'a> TodoList<'a> {
             .map(|todo| todo.toggle_todo())
             .unwrap();
     }
-    pub fn filter_todos(&self, show_everything: bool) -> Vec<&Todo<'a>> {
+    pub fn filter_todos(&self, show_everything: bool) -> Vec<&Todo> {
         self.todos
             .iter()
             .map(|(_, todo)| todo)
@@ -38,20 +40,20 @@ impl<'a> TodoList<'a> {
     }
 }
 
-impl Default for TodoList<'_> {
+impl Default for TodoList {
     fn default() -> Self {
         Self::new()
     }
 }
 
-#[derive(Debug)]
-pub struct Todo<'a> {
+#[derive(Debug, Serialize)]
+pub struct Todo {
     pub id: String,
     pub status: TodoStatus,
-    pub name: &'a str,
+    pub name: String,
 }
-impl<'a> Todo<'a> {
-    pub fn new(name: &'a str) -> Self {
+impl Todo {
+    pub fn new(name: String) -> Self {
         Self {
             id: cuid::cuid().unwrap(),
             name,
@@ -66,7 +68,7 @@ impl<'a> Todo<'a> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub enum TodoStatus {
     Done,
     Pending,
